@@ -125,6 +125,7 @@ async function handle(msg) {
 }
 
 const rl = readline.createInterface({ input: process.stdin });
+const pending = new Set(); // in-flight async tool calls; drain before exit
 rl.on("line", (line) => {
   const s = line.trim();
   if (!s) return;
@@ -134,9 +135,15 @@ rl.on("line", (line) => {
   } catch (e) {
     return;
   }
-  Promise.resolve(handle(msg)).catch((e) => {
-    if (msg && msg.id != null)
-      error(msg.id, -32603, "Internal error: " + String(e.message || e));
-  });
+  const p = Promise.resolve(handle(msg))
+    .catch((e) => {
+      if (msg && msg.id != null)
+        error(msg.id, -32603, "Internal error: " + String(e.message || e));
+    })
+    .finally(() => pending.delete(p));
+  pending.add(p);
 });
-process.stdin.on("end", () => process.exit(0));
+// Don't kill in-flight responses when stdin closes (e.g. batch/pipe probes).
+process.stdin.on("end", () => {
+  Promise.allSettled([...pending]).then(() => process.exit(0));
+});
