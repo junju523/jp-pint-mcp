@@ -14,9 +14,9 @@ const VERSION = "0.1.0";
 const TOOLS = [
   {
     name: "check_registration_number",
-    title: "Check a Japanese invoice registration number (T+13)",
+    title: "Check a Japanese invoice registration number (T+13): format, check digit, and 国税庁 real-existence",
     description:
-      "Validate a 適格請求書発行事業者登録番号 (Japanese qualified-invoice registration number, 'T' followed by 13 digits): format and the 法人番号 check digit. Free, no key needed.",
+      "Validate a 適格請求書発行事業者登録番号 (Japanese qualified-invoice registration number, 'T' + 13 digits): format and the 法人番号 check digit, PLUS real-existence verification against the National Tax Agency (国税庁) public registry — returns whether the number actually exists, is currently valid (not revoked/expired), and the registered company name. Free, no key needed.",
     inputSchema: {
       type: "object",
       properties: {
